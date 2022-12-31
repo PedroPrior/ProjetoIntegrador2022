@@ -5,6 +5,8 @@ import com.pedroprior.projetointegrador.entities.Author;
 
 import com.pedroprior.projetointegrador.repository.AuthorRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
@@ -23,6 +25,8 @@ import java.util.UUID;
 @RequestMapping("/author")
 public class AuthorController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorController.class);
+
     @Autowired
     AuthorRepository authorRepository;
 
@@ -30,7 +34,8 @@ public class AuthorController {
     ResponseEntity<?> addAuthor(@RequestBody  Author author) {
 
         authorRepository.save(author);
-        return ResponseEntity.ok().body("Ok, usuário adicionar com sucesso");
+        LOGGER.info("Autor criado com sucesso", author.toString());
+        return ResponseEntity.ok().body(author);
 
     }
 
@@ -38,19 +43,32 @@ public class AuthorController {
     @GetMapping(value = "/authors")
     ResponseEntity<List<Author>> listAuthors() {
 
-        List<Author> authors = authorRepository.findAll();
+        try {
+            List<Author> authors = authorRepository.findAll();
+            LOGGER.info("Busca realizada com sucesso");
+            return ResponseEntity.ok().body(authors);
 
-
-       return ResponseEntity.ok().body(authors);
+        } catch(RuntimeException e) {
+            LOGGER.error("Erro ao realizar busca.", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
 
     }
 
     @GetMapping("/{id}")
     ResponseEntity<?> getById(@PathVariable(value = "id") UUID id) {
 
-        Author author = authorRepository.findById(id).get();
+        try {
 
-        return ResponseEntity.ok().body(author);
+            Author author = authorRepository.findById(id).get();
+            LOGGER.info("Autor encontrado com sucesso!");
+            return ResponseEntity.ok().body(author);
+
+        } catch(RuntimeException e) {
+            LOGGER.error("Autor não encontrado!");
+            throw new RuntimeException(e.getMessage());
+        }
+
     }
 
 
@@ -58,8 +76,11 @@ public class AuthorController {
     ResponseEntity<Author> alterAuthor(@PathVariable(value = "id") UUID id, @RequestBody Author author) {
 
 
-           Author authorUpdate = authorRepository.findById(id).orElseThrow(() ->
-                   new RuntimeException("Error" + id));
+
+        try {
+
+            Author authorUpdate = authorRepository.findById(id).orElseThrow(() ->
+                    new RuntimeException("Error" + id));
 
             authorUpdate.setName(author.getName());
             authorUpdate.setBooks(author.getBooks());
@@ -69,21 +90,35 @@ public class AuthorController {
             authorRepository.save(authorUpdate);
 
 
+            LOGGER.info("Update realizado com sucesso");
+            return ResponseEntity.ok().body(authorUpdate);
 
-        return ResponseEntity.ok().body(authorUpdate);
+        } catch(RuntimeException e) {
+            LOGGER.error("Erro ao realizar o update.", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+
+
     }
 
 
     @DeleteMapping("/{id}")
     ResponseEntity<String> deleteAuthor(@PathVariable(value = "id") UUID id) {
 
-        authorRepository.deleteById(id);
+        try {
+            authorRepository.deleteById(id);
+            LOGGER.info("Autor deletado com sucesso.");
+            return ResponseEntity.ok().body("Ok, usuário deletado!");
+        } catch(RuntimeException e ) {
+            LOGGER.error("Autor não encotrado.");
+            throw new RuntimeException(e.getMessage());
+        }
 
-        return ResponseEntity.ok().body("Ok, usuário deletado!");
+
     }
 
 
-
+    // Thymeleaf <--
 
     @GetMapping("/new")
     public String addAuthorModel(Model model) {

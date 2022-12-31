@@ -5,6 +5,8 @@ import com.pedroprior.projetointegrador.entities.Book;
 
 import com.pedroprior.projetointegrador.entities.Category;
 import com.pedroprior.projetointegrador.repository.BookRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -22,60 +24,100 @@ import java.util.UUID;
 @RequestMapping("/book")
 public class BookController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BookController.class);
+
     @Autowired
     BookRepository bookRepository;
 
 
     @PostMapping
     ResponseEntity addBook(@RequestBody Book book) {
-        bookRepository.save(book);
-        return ResponseEntity.ok().body(book);
+
+        try {
+            bookRepository.save(book);
+            LOGGER.info("Livro salvo com sucesso");
+            return ResponseEntity.ok().body(book);
+        } catch(RuntimeException e) {
+            LOGGER.error("Erro ao salvar", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+
     }
 
     @GetMapping
     ResponseEntity<List<Book>> listBooks() {
-        List<Book> books = new ArrayList<>();
-        Iterable<Book> booksAll = bookRepository.findAll();
-        for (Book book : booksAll) {
-            books.add(book);
 
+        try {
+
+            List<Book> books = new ArrayList<>();
+            Iterable<Book> booksAll = bookRepository.findAll();
+            for (Book book : booksAll) {
+                books.add(book);
+            }
+            LOGGER.info("Sucesso ao realizar busca.");
+            return ResponseEntity.ok().body(books);
+
+        } catch(RuntimeException e) {
+            LOGGER.error("Erro ao realizar busca.");
+            throw new RuntimeException(e.getMessage());
         }
-
-        return ResponseEntity.ok().body(books);
     }
 
     @GetMapping("/{id}")
     ResponseEntity getById(@PathVariable(value = "id") UUID id) {
 
-        Book book = bookRepository.findById(id).get();
-        return ResponseEntity.ok().body(book);
+        try {
+
+            Book book = bookRepository.findById(id).get();
+            LOGGER.info("Busca realizada com sucesso");
+            return ResponseEntity.ok().body(book);
+
+        } catch(RuntimeException e) {
+            LOGGER.error("Error ao buscar livro.");
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @PutMapping(value = "/{id}")
-    ResponseEntity<Book> alterbook(@PathVariable(value = "id") UUID id, @RequestBody Book book) {
+    ResponseEntity<Book> alterBook(@PathVariable(value = "id") UUID id, @RequestBody Book book) {
+
+        try {
+
+            Book bookUpdate = bookRepository.findById(id).orElseThrow(() ->
+                    new RuntimeException("Error" + id));
+
+            bookUpdate.setName(book.getName());
+            bookUpdate.setAuthor(book.getAuthor());
+            bookUpdate.setIsbn(book.getIsbn());
+            bookUpdate.setCategory(book.getCategory());
+            bookUpdate.setDescription(book.getDescription());
 
 
-        Book bookUpdate = bookRepository.findById(id).orElseThrow(() ->
-                new RuntimeException("Error" + id));
+            bookRepository.save(bookUpdate);
 
-        bookUpdate.setName(book.getName());
-        bookUpdate.setAuthor(book.getAuthor());
-        bookUpdate.setIsbn(book.getIsbn());
-        bookUpdate.setCategory(book.getCategory());
-        bookUpdate.setDescription(book.getDescription());
+            LOGGER.info("Livro alterado com sucesso");
+            return ResponseEntity.ok().body(bookUpdate);
 
-
-        bookRepository.save(bookUpdate);
-
-        return ResponseEntity.ok().body(bookUpdate);
+        } catch (RuntimeException e) {
+            LOGGER.error("Problema em alterar o livro");
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
 
     @DeleteMapping("/{id}")
     ResponseEntity<String> deleteBook(@PathVariable(value = "id") UUID id) {
-        bookRepository.deleteById(id);
-        String message = "Usuário deletado com sucesso " + id;
-        return ResponseEntity.ok().body(message);
+
+        try {
+
+            bookRepository.deleteById(id);
+            LOGGER.info("Livro deletado com sucesso.");
+            return ResponseEntity.ok().body("Usuário deletado");
+
+        } catch(RuntimeException e) {
+            LOGGER.error("Erro ao deletar o livro");
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @RequestMapping("/list")

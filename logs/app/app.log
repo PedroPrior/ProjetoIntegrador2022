@@ -1,0 +1,22 @@
+31-12-2022 09:29:50.570 | 218  | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Iniciando o sistema do Projeto Integrador
+31-12-2022 09:29:50.909 | 557  | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Starting ProjetoIntegradorApplication using Java 19.0.1 with PID 15025 (/home/kmz/Documentos/Projeto/ProjetoIntegrador/target/classes started by kmz in /home/kmz/Documentos/Projeto/ProjetoIntegrador)
+31-12-2022 09:29:50.910 | 558  | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - No active profile set, falling back to 1 default profile: "default"
+31-12-2022 09:29:53.703 | 3351 | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Started ProjetoIntegradorApplication in 3.072 seconds (process running for 3.74)
+31-12-2022 09:29:53.705 | 3353 | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Iniciado com sucesso
+31-12-2022 09:30:04.471 | 14119 | [http-nio-8080-exec-1] | INFO  | c.p.p.controller.BookController - Busca realizada com sucesso, livro de id: 
+31-12-2022 09:34:04.909 | 254557 | [http-nio-8080-exec-6] | INFO  | c.p.p.controller.BookController - Busca realizada com sucesso, livro de id: 
+31-12-2022 09:36:37.269 | 406917 | [http-nio-8080-exec-8] | ERROR | c.p.p.controller.BookController - Error ao buscar o ID: 
+31-12-2022 09:42:01.379 | 228  | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Iniciando o sistema do Projeto Integrador
+31-12-2022 09:42:01.696 | 545  | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Starting ProjetoIntegradorApplication using Java 19.0.1 with PID 15806 (/home/kmz/Documentos/Projeto/ProjetoIntegrador/target/classes started by kmz in /home/kmz/Documentos/Projeto/ProjetoIntegrador)
+31-12-2022 09:42:01.697 | 546  | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - No active profile set, falling back to 1 default profile: "default"
+31-12-2022 09:42:04.485 | 3334 | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Started ProjetoIntegradorApplication in 3.049 seconds (process running for 3.68)
+31-12-2022 09:42:04.487 | 3336 | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Iniciado com sucesso
+31-12-2022 09:42:11.442 | 10291 | [http-nio-8080-exec-1] | ERROR | c.p.p.controller.BookController - Error ao buscar livro.
+31-12-2022 09:42:28.656 | 27505 | [http-nio-8080-exec-5] | INFO  | c.p.p.controller.AuthorController - Busca realizada com sucesso
+31-12-2022 09:42:55.108 | 53957 | [http-nio-8080-exec-6] | INFO  | c.p.p.controller.AuthorController - Autor encontrado com sucesso!
+31-12-2022 09:43:44.314 | 200  | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Iniciando o sistema do Projeto Integrador
+31-12-2022 09:43:44.675 | 561  | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Starting ProjetoIntegradorApplication using Java 19.0.1 with PID 15981 (/home/kmz/Documentos/Projeto/ProjetoIntegrador/target/classes started by kmz in /home/kmz/Documentos/Projeto/ProjetoIntegrador)
+31-12-2022 09:43:44.677 | 563  | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - No active profile set, falling back to 1 default profile: "default"
+31-12-2022 09:43:47.548 | 3434 | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Started ProjetoIntegradorApplication in 3.17 seconds (process running for 3.775)
+31-12-2022 09:43:47.550 | 3436 | [main] | INFO  | c.p.p.ProjetoIntegradorApplication - Iniciado com sucesso
+31-12-2022 09:43:48.377 | 4263 | [http-nio-8080-exec-2] | INFO  | c.p.p.controller.AuthorController - Autor encontrado com sucesso!

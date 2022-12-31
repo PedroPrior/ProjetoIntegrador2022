@@ -5,6 +5,8 @@ import com.pedroprior.projetointegrador.entities.Author;
 import com.pedroprior.projetointegrador.entities.Category;
 
 import com.pedroprior.projetointegrador.repository.CategoryRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,32 +28,51 @@ public class CategoryController {
     @Autowired
     CategoryRepository categoryRepository;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CategoryController.class);
 
     @PostMapping
     ResponseEntity<String> addCategory(@RequestBody Category category) {
-        categoryRepository.save(category);
-        String message = "A categoria foi adicionar com sucesso " + category;
-        return ResponseEntity.ok().body(message);
+        try {
+            categoryRepository.save(category);
+            LOGGER.info("Categoria criada com sucesso " + category.getId());
+            return ResponseEntity.ok().body("Categoria salva com sucesso.");
+
+        } catch(RuntimeException e) {
+            LOGGER.error("Erro ao criar categoria", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+
     }
 
 
 
     @GetMapping
     List listCategory() {
-        return categoryRepository.findAll();
+        try {
+            LOGGER.info("Sucesso ao realizar a busca de categorias");
+            return categoryRepository.findAll();
+        } catch(RuntimeException e) {
+            LOGGER.error("Erro ao listar as categorias", e.getMessage());
+            throw new RuntimeException(e.getMessage());
+        }
+
+
     }
 
     @GetMapping("/{id}")
     ResponseEntity<Object> getById(@PathVariable(value = "id") UUID id) {
 
-        Optional<Category> category = categoryRepository.findById(id);
+        try {
 
-        if (!category.isPresent()) {
+            Optional<Category> category = categoryRepository.findById(id);
 
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado, tente novamente.");
-
-        }
+            LOGGER.info("Sucesso em realizar a busca da categoria");
             return ResponseEntity.ok().body(category);
+
+        } catch (RuntimeException e) {
+            LOGGER.error("Erro ao buscar categoria");
+            throw new RuntimeException(e.getMessage());
+        }
 
 
     }
@@ -60,22 +81,38 @@ public class CategoryController {
     @PutMapping(value = "/{id}")
     ResponseEntity<Category> alterCategory(@PathVariable(value = "id") UUID id, @RequestBody Category category) {
 
+        try {
+            Category categoryUpdate = categoryRepository.findById(id).orElseThrow(() ->
+                    new RuntimeException("Error" + id));
 
-        Category categoryUpdate = categoryRepository.findById(id).orElseThrow(() ->
-                new RuntimeException("Error" + id));
+            categoryUpdate.setName(category.getName());
+            categoryUpdate.setBooks(category.getBooks());
+            categoryRepository.save(categoryUpdate);
 
-        categoryUpdate.setName(category.getName());
-        categoryUpdate.setBooks(category.getBooks());
-        categoryRepository.save(categoryUpdate);
+            LOGGER.info("Sucesso ao alterar a categoria.");
+            return ResponseEntity.ok().body(categoryUpdate);
 
-        return ResponseEntity.ok().body(categoryUpdate);
+        } catch(RuntimeException e) {
+            LOGGER.error("Erro ao alterar a categoria.");
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     @DeleteMapping("/{id}")
+
+
     ResponseEntity<String> deleteCategory(@PathVariable(value = "id") UUID id) {
-        categoryRepository.deleteById(id);
-        String message = "A categoria foi deletado com sucesso: " + id;
-        return ResponseEntity.ok().body(message);
+
+        try {
+            categoryRepository.deleteById(id);
+            LOGGER.info("Categoria de ID: " + id + " deletada com sucesso");
+            return ResponseEntity.ok().body("Categoria de ID: " + id + " deletada com sucesso");
+
+        } catch (RuntimeException e) {
+            LOGGER.error("Erro ao deletar categoria.");
+            throw new RuntimeException(e.getMessage());
+        }
+
     }
 
 
