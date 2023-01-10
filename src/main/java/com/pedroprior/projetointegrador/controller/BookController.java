@@ -1,14 +1,15 @@
 package com.pedroprior.projetointegrador.controller;
 
+import com.pedroprior.projetointegrador.entities.Author;
 import com.pedroprior.projetointegrador.entities.Book;
 
 
 import com.pedroprior.projetointegrador.entities.Category;
 import com.pedroprior.projetointegrador.repository.BookRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -16,52 +17,17 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.UUID;
 
 @Controller
 @RequestMapping("/book")
 public class BookController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BookController.class);
+
 
     @Autowired
     BookRepository bookRepository;
-
-
-    @PostMapping
-    ResponseEntity addBook(@RequestBody Book book) {
-
-        try {
-            bookRepository.save(book);
-            LOGGER.info("Livro salvo com sucesso");
-            return ResponseEntity.ok().body(book);
-        } catch(RuntimeException e) {
-            LOGGER.error("Erro ao salvar", e.getMessage());
-            throw new RuntimeException(e.getMessage());
-        }
-
-    }
-
-    @GetMapping
-    ResponseEntity<List<Book>> listBooks() {
-
-        try {
-
-            List<Book> books = new ArrayList<>();
-            Iterable<Book> booksAll = bookRepository.findAll();
-            for (Book book : booksAll) {
-                books.add(book);
-            }
-            LOGGER.info("Sucesso ao realizar busca.");
-            return ResponseEntity.ok().body(books);
-
-        } catch(RuntimeException e) {
-            LOGGER.error("Erro ao realizar busca.");
-            throw new RuntimeException(e.getMessage());
-        }
-    }
 
     @GetMapping("/{id}")
     ResponseEntity getById(@PathVariable(value = "id") UUID id) {
@@ -69,57 +35,17 @@ public class BookController {
         try {
 
             Book book = bookRepository.findById(id).get();
-            LOGGER.info("Busca realizada com sucesso");
+
             return ResponseEntity.ok().body(book);
 
         } catch(RuntimeException e) {
-            LOGGER.error("Error ao buscar livro.");
-            throw new RuntimeException(e.getMessage());
-        }
-    }
 
-    @PutMapping(value = "/{id}")
-    ResponseEntity<Book> alterBook(@PathVariable(value = "id") UUID id, @RequestBody Book book) {
-
-        try {
-
-            Book bookUpdate = bookRepository.findById(id).orElseThrow(() ->
-                    new RuntimeException("Error" + id));
-
-            bookUpdate.setName(book.getName());
-            bookUpdate.setAuthor(book.getAuthor());
-            bookUpdate.setIsbn(book.getIsbn());
-            bookUpdate.setCategory(book.getCategory());
-            bookUpdate.setDescription(book.getDescription());
-
-
-            bookRepository.save(bookUpdate);
-
-            LOGGER.info("Livro alterado com sucesso");
-            return ResponseEntity.ok().body(bookUpdate);
-
-        } catch (RuntimeException e) {
-            LOGGER.error("Problema em alterar o livro");
             throw new RuntimeException(e.getMessage());
         }
     }
 
 
-    @DeleteMapping("/{id}")
-    ResponseEntity<String> deleteBook(@PathVariable(value = "id") UUID id) {
-
-        try {
-
-            bookRepository.deleteById(id);
-            LOGGER.info("Livro deletado com sucesso.");
-            return ResponseEntity.ok().body("Usuário deletado");
-
-        } catch(RuntimeException e) {
-            LOGGER.error("Erro ao deletar o livro");
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR', 'ROLE_USER')")
     @RequestMapping("/list")
     public String listAuthor(Model model) {
         model.addAttribute("books", bookRepository.findAll());
@@ -133,6 +59,7 @@ public class BookController {
         return "/create-book";
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PostMapping("/save")
     public String saveBook(@Validated Book book, BindingResult result,
                              RedirectAttributes attributes) {
@@ -143,4 +70,43 @@ public class BookController {
         attributes.addFlashAttribute("message", "Book is saved!");
         return "redirect:/book/new";
     }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    @PostMapping("/update/{id}")
+    public String updateBook(@PathVariable(value = "id") UUID id, @Valid Book book,
+                               BindingResult bindingResult, Model model
+    ) {
+
+        if (bindingResult.hasErrors()) {
+            book.setId(id);
+            return "update-book";
+        }
+
+        bookRepository.save(book);
+
+        return "redirect:/book/list";
+    }
+
+
+
+    @GetMapping("/edit/{id}")
+    public String showUpdateForm(@PathVariable("id") UUID id, Model model) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
+
+        model.addAttribute("book", book);
+        return "/update-book";
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    @GetMapping("/delete/{id}")
+    public String deleteUser(@PathVariable("id") UUID id, Model model) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
+        bookRepository.delete(book);
+        return "redirect:/book/list";
+
+    }
+
+
 }

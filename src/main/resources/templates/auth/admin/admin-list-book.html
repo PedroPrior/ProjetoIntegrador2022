@@ -42,7 +42,13 @@
 				<td><span th:text="${book.rating}"> Rating </span></td>
 				<td><span th:text="${book.author.getName()}"> Author </span></td>
 				<td><span th:text="${book.category.getName()}"> Category </span></td>
+
+				<td> <a th:href="@{/book/edit/{id}(id=${book.id})}" class="btn btn-primary">Update</a>
+					<a th:href="@{/book/delete/{id}(id=${book.id})}" class="btn btn-danger">Delete</a>
+				</td>
 			</tr>
+
+
 		</tbody>
 	</table>    
     </div>

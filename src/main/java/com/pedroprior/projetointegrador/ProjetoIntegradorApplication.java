@@ -1,23 +1,30 @@
 package com.pedroprior.projetointegrador;
 
+import com.pedroprior.projetointegrador.controller.UserController;
+import com.pedroprior.projetointegrador.entities.RoleModel;
+import com.pedroprior.projetointegrador.repository.RoleModelRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.ui.Model;
+
+import java.util.List;
 
 @SpringBootApplication
 public class ProjetoIntegradorApplication {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProjetoIntegradorApplication.class);
 
     public static void main(String[] args) {
-        LOGGER.info("Iniciando o sistema do Projeto Integrador");
         SpringApplication.run(ProjetoIntegradorApplication.class, args);
-        LOGGER.info("Iniciado com sucesso");
+
+        }
 
 
     }
 
 
 
-}
+

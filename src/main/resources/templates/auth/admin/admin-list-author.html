@@ -36,7 +36,13 @@
 				<td><span th:text="${author.name}"> Name </span></td>
 				<td><span th:text="${author.birthDate}"> Birthday </span></td>
 				<td><span th:text="${author.books}"> Book List </span></td>
+
+				<td> <a th:href="@{/author/edit/{id}(id=${author.id})}" class="btn btn-primary">Update</a>
+					<a th:href="@{/author/delete/{id}(id=${author.id})}" class="btn btn-danger">Delete</a>
+				</td>
 			</tr>
+
+
 		</tbody>
 	</table>    
     </div>

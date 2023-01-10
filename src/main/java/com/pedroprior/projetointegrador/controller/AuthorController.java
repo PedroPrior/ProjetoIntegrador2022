@@ -3,14 +3,16 @@ package com.pedroprior.projetointegrador.controller;
 
 import com.pedroprior.projetointegrador.entities.Author;
 
+import com.pedroprior.projetointegrador.entities.RoleModel;
+import com.pedroprior.projetointegrador.entities.UserModel;
 import com.pedroprior.projetointegrador.repository.AuthorRepository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,101 +27,29 @@ import java.util.UUID;
 @RequestMapping("/author")
 public class AuthorController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AuthorController.class);
 
     @Autowired
     AuthorRepository authorRepository;
 
-    @PostMapping
-    ResponseEntity<?> addAuthor(@RequestBody  Author author) {
-
-        authorRepository.save(author);
-        LOGGER.info("Autor criado com sucesso", author.toString());
-        return ResponseEntity.ok().body(author);
-
-    }
-
-
-    @GetMapping(value = "/authors")
-    ResponseEntity<List<Author>> listAuthors() {
-
-        try {
-            List<Author> authors = authorRepository.findAll();
-            LOGGER.info("Busca realizada com sucesso");
-            return ResponseEntity.ok().body(authors);
-
-        } catch(RuntimeException e) {
-            LOGGER.error("Erro ao realizar busca.", e.getMessage());
-            throw new RuntimeException(e.getMessage());
-        }
-
-    }
-
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER', 'ROLE_MODERATOR')")
     @GetMapping("/{id}")
     ResponseEntity<?> getById(@PathVariable(value = "id") UUID id) {
 
         try {
 
             Author author = authorRepository.findById(id).get();
-            LOGGER.info("Autor encontrado com sucesso!");
+
             return ResponseEntity.ok().body(author);
 
         } catch(RuntimeException e) {
-            LOGGER.error("Autor não encontrado!");
+
             throw new RuntimeException(e.getMessage());
         }
 
     }
-
-
-    @PutMapping(value = "/{id}")
-    ResponseEntity<Author> alterAuthor(@PathVariable(value = "id") UUID id, @RequestBody Author author) {
-
-
-
-        try {
-
-            Author authorUpdate = authorRepository.findById(id).orElseThrow(() ->
-                    new RuntimeException("Error" + id));
-
-            authorUpdate.setName(author.getName());
-            authorUpdate.setBooks(author.getBooks());
-            authorUpdate.setBirthDate(author.getBirthDate());
-
-
-            authorRepository.save(authorUpdate);
-
-
-            LOGGER.info("Update realizado com sucesso");
-            return ResponseEntity.ok().body(authorUpdate);
-
-        } catch(RuntimeException e) {
-            LOGGER.error("Erro ao realizar o update.", e.getMessage());
-            throw new RuntimeException(e.getMessage());
-        }
-
-
-    }
-
-
-    @DeleteMapping("/{id}")
-    ResponseEntity<String> deleteAuthor(@PathVariable(value = "id") UUID id) {
-
-        try {
-            authorRepository.deleteById(id);
-            LOGGER.info("Autor deletado com sucesso.");
-            return ResponseEntity.ok().body("Ok, usuário deletado!");
-        } catch(RuntimeException e ) {
-            LOGGER.error("Autor não encotrado.");
-            throw new RuntimeException(e.getMessage());
-        }
-
-
-    }
-
 
     // Thymeleaf <--
-
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER', 'ROLE_MODERATOR')")
     @GetMapping("/new")
     public String addAuthorModel(Model model) {
         model.addAttribute("author", new Author());
@@ -127,6 +57,7 @@ public class AuthorController {
     }
 
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER', 'ROLE_MODERATOR')")
     @RequestMapping("/list")
     public String listAuthor(Model model) {
         model.addAttribute("authors", authorRepository.findAll());
@@ -135,14 +66,57 @@ public class AuthorController {
         return "auth/admin/admin-list-author";
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
     @PostMapping("/save")
     public String saveAuthor(@Validated Author author, BindingResult result,
-                                RedirectAttributes attributes) {
+                             RedirectAttributes attributes) {
         if (result.hasErrors()) {
             return "/create-author";
         }
+
+
         authorRepository.save(author);
         attributes.addFlashAttribute("message", "Author is saved!");
         return "redirect:/author/new";
     }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    @GetMapping("/delete/{id}")
+    public String deleteUser(@PathVariable("id") UUID id, Model model) {
+        Author author = authorRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
+        authorRepository.delete(author);
+        return "redirect:/author/list";
+
+    }
+
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_MODERATOR')")
+    @PostMapping("/update/{id}")
+    public String updateAuthor(@PathVariable(value = "id") UUID id, @Valid Author author,
+                             BindingResult bindingResult, Model model
+    ) {
+
+        if (bindingResult.hasErrors()) {
+            author.setId(id);
+            return "update-author";
+        }
+
+        authorRepository.save(author);
+
+        return "redirect:/user/list";
+    }
+
+
+    @GetMapping("/edit/{id}")
+    public String showUpdateForm(@PathVariable("id") UUID id, Model model) {
+        Author author = authorRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid user Id:" + id));
+
+        model.addAttribute("author", author);
+        return "/update-author";
+    }
+
+
 }
